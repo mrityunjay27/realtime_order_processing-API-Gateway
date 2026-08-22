@@ -34,6 +34,17 @@ HOP_BY_HOP_HEADERS = {
     "upgrade",
 }
 
+# Trusted identity headers are set by the gateway after authentication.
+# Client-supplied values are always stripped so they can never be
+# spoofed through to the downstream services. The dev-bypass header is
+# likewise internal-only and never forwarded.
+SPOOFABLE_HEADERS = {
+    "x-user-id",
+    "x-user-role",
+    "x-auth-type",
+    "x-dev-auth",
+}
+
 
 class UpstreamError(Exception):
     """A normalized error representing an unhealthy/unreachable upstream."""
@@ -55,13 +66,26 @@ class GatewayClient:
             return f"{self.base_url}{self.prefix}/{path.lstrip('/')}"
         return f"{self.base_url}{self.prefix}/"
 
-    async def proxy(self, method, path, *, headers=None, body=None, query=None) -> httpx.Response:
+    async def proxy(
+        self,
+        method,
+        path,
+        *,
+        headers=None,
+        body=None,
+        query=None,
+        trusted_identity: dict | None = None,
+    ) -> httpx.Response:
         target = self._target(path)
         forwarded_headers = {
             key: value
             for key, value in (headers or {}).items()
             if key.lower() not in HOP_BY_HOP_HEADERS
+            and key.lower() not in SPOOFABLE_HEADERS
         }
+        # Identity headers are merged AFTER the strip above: only values the
+        # gateway derived from a verified identity may reach downstream.
+        forwarded_headers.update(trusted_identity or {})
 
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
