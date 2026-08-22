@@ -22,6 +22,7 @@ from app.middleware.correlation import CorrelationMiddleware
 from app.routes.inventory import inventory_router, products_router
 from app.routes.orders import router as orders_router
 from app.routes.payment import router as payment_router
+from app.routes.auth import router as auth_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -44,6 +45,7 @@ app.include_router(orders_router)
 app.include_router(inventory_router)
 app.include_router(products_router)
 app.include_router(payment_router)
+app.include_router(auth_router)
 
 
 @app.get("/health", tags=["health"])

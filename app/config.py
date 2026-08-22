@@ -22,6 +22,7 @@ GATEWAY_PORT = int(os.getenv("GATEWAY_PORT", "8081"))
 ORDER_SERVICE_URL = _service_url("ORDER_SERVICE_URL", "http://localhost:8001")
 INVENTORY_SERVICE_URL = _service_url("INVENTORY_SERVICE_URL", "http://localhost:8000")
 PAYMENT_SERVICE_URL = _service_url("PAYMENT_SERVICE_URL", "http://localhost:8002")
+AUTH_SERVICE_URL = _service_url("AUTH_SERVICE_URL", "http://localhost:8003")
 
 # Never let the gateway wait on an upstream forever.
 GATEWAY_TIMEOUT_SECONDS = float(os.getenv("GATEWAY_TIMEOUT_SECONDS", "10"))
